@@ -1,0 +1,37 @@
+{
+  "name": "bienes-raices",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "babel-node": "babel-node --presets=@babel/preset-env",
+    "start": "node index.js",
+    "dev": "nodemon -L --exec npm run babel-node index.js",
+    "css": "postcss public/css/tailwind.css -o public/css/app.css --watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "express-validator": "^6.14.2",
+    "mysql2": "^2.3.3",
+    "nodemailer": "^6.7.8",
+    "pug": "^3.0.2",
+    "sequelize": "^6.21.4"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.18.10",
+    "@babel/core": "^7.18.13",
+    "@babel/node": "^7.18.10",
+    "@babel/preset-env": "^7.18.10",
+    "autoprefixer": "^10.4.8",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.19",
+    "postcss": "^8.4.16",
+    "postcss-cli": "^10.0.0",
+    "tailwindcss": "^3.1.8"
+  }
+}
