@@ -1,11 +1,19 @@
 import express from "express";
 import usersRouter from "./routers/usersRouter.js";
 import db from "./config/db.js";
+import csrf from "csurf";
+import cookieParser from "cookie-parser";
 //crear la app
 const app = express();
 
 //habilita letura de formulario
 app.use(express.urlencoded({ extended: true }));
+
+//habilitar cookie-parser
+app.use(cookieParser());
+
+//habilita csrf
+app.use(csrf({ cookie: true }));
 
 //conection a databese
 try {
