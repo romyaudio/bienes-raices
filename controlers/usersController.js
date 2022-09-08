@@ -3,7 +3,7 @@ import { check, validationResult } from "express-validator";
 import Users from "../models/Users.js";
 import bcrypt from "bcrypt";
 import { generalId } from "../helpers/tokens.js";
-import { emailRegister } from "../helpers/emails.js";
+import { emailRegister, emailResetPassword } from "../helpers/emails.js";
 
 const formLogin = (req, res) => {
   res.render("auth/login", {
@@ -97,7 +97,94 @@ const formVerify = async (req, res) => {
 const formForget = (req, res) => {
   res.render("auth/forget_password", {
     pagina: "Restablecer mi password",
+    csrfToken: req.csrfToken(),
   });
 };
 
-export { formLogin, formRegister, formForget, Register, formVerify };
+const resetPassword = async (req, res) => {
+  await check("email").isEmail().withMessage("Este no ese un email").run(req);
+  const results = validationResult(req);
+  if (!results.isEmpty()) {
+    return res.render("auth/forget_password", {
+      pagina: "Restablecer mi password",
+      errors: results.array(),
+      csrfToken: req.csrfToken(),
+    });
+  }
+  // verificame el email este en nuestra base de dato
+  const { email } = req.body;
+  const exitedEmail = await Users.findOne({ where: { email } });
+  if (!exitedEmail) {
+    return res.render("auth/forget_password", {
+      pagina: "Error al verificar el  email",
+      csrfToken: req.csrfToken(),
+      message: "Este email no se encuetra en nuesta base de dato",
+      error: true,
+    });
+  }
+  //generamos en nuevo token de verifivacion
+  exitedEmail.token = generalId();
+  await exitedEmail.save();
+  emailResetPassword(exitedEmail);
+  return res.render("templates/message-verificado", {
+    pagina: "Email verificado con exito!",
+    message:
+      "Le enviamos la intruciones a si email para crea un nuevo password",
+  });
+};
+// verificamos el token
+const verityTokenPassword = async (req, res) => {
+  const { token } = req.params;
+  const user = await Users.findOne({ where: { token } });
+  if (!user) {
+    res.render("templates/message-verificado", {
+      pagina: "Error al verificar emial",
+      message: "Este email no existe en nuetra base de datos",
+    });
+  }
+
+  res.render("auth/reset-password", {
+    pagina: "Restablecer mi password",
+    csrfToken: req.csrfToken(),
+  });
+};
+//creamos nuevo password
+const newPassword = async (req, res) => {
+  await check("password")
+    .isLength({ min: 6 })
+    .withMessage("El password minimo 6 catareteres")
+    .run(req);
+
+  let results = validationResult(req);
+
+  if (!results.isEmpty()) {
+    return res.render("auth/reset-password", {
+      pagina: "Restablecer mi password",
+      errors: results.array(),
+      user: req.body,
+      csrfToken: req.csrfToken(),
+    });
+  }
+  const { token } = req.params;
+  const { password } = req.body;
+  const user = await Users.findOne({ where: { token } });
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(password, salt);
+  user.token = null;
+  await user.save();
+  res.render("auth/confirm-account", {
+    pagina: "Password restablecido",
+    message: "Password restablecido con exito!",
+  });
+};
+
+export {
+  formLogin,
+  formRegister,
+  formForget,
+  Register,
+  formVerify,
+  resetPassword,
+  verityTokenPassword,
+  newPassword,
+};

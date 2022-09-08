@@ -7,12 +7,18 @@ import {
   formRegister,
   Register,
   formVerify,
+  resetPassword,
+  verityTokenPassword,
+  newPassword,
 } from "../controlers/usersController.js";
 
 router.get("/login", formLogin);
 router.get("/register", formRegister);
 router.post("/register", Register);
-router.get("/restablecer-password", formForget);
 router.get("/verify/:token", formVerify);
+router.get("/restablecer-password", formForget);
+router.post("/restablecer-password", resetPassword);
+router.get("/restablecer-password/:token", verityTokenPassword);
+router.post("/restablecer-password/:token", newPassword);
 
 export default router;
