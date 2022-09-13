@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 //router
 import {
+  login,
   formForget,
   formLogin,
   formRegister,
@@ -13,6 +14,7 @@ import {
 } from "../controlers/usersController.js";
 
 router.get("/login", formLogin);
+router.post("/login", login);
 router.get("/register", formRegister);
 router.post("/register", Register);
 router.get("/verify/:token", formVerify);

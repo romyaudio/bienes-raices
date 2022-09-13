@@ -2,13 +2,68 @@ import { check, validationResult } from "express-validator";
 
 import Users from "../models/Users.js";
 import bcrypt from "bcrypt";
-import { generalId } from "../helpers/tokens.js";
+import { genJwt, generalId } from "../helpers/tokens.js";
 import { emailRegister, emailResetPassword } from "../helpers/emails.js";
 
 const formLogin = (req, res) => {
   res.render("auth/login", {
     pagina: "Inicial Sesion",
+    csrfToken: req.csrfToken(),
   });
+};
+
+const login = async (req, res) => {
+  await check("email").isEmail().withMessage("Email es requerido").run(req);
+  await check("password")
+    .notEmpty()
+    .withMessage("El password es requerido")
+    .run(req);
+
+  let results = validationResult(req);
+
+  if (!results.isEmpty()) {
+    return res.render("auth/login", {
+      pagina: "Login",
+      errors: results.array(),
+      user: req.body,
+      csrfToken: req.csrfToken(),
+    });
+  }
+  const exiteuse = await Users.findOne({ where: { email: req.body.email } });
+  if (!exiteuse) {
+    return res.render("auth/login", {
+      pagina: "Login",
+      errors: [{ msg: "Este Usuario no esta registrado" }],
+      user: req.body,
+      csrfToken: req.csrfToken(),
+    });
+  }
+  if (!exiteuse.verified) {
+    return res.render("auth/login", {
+      pagina: "Login",
+      errors: [{ msg: "Tu cuenta no esta verificado" }],
+      user: req.body,
+      csrfToken: req.csrfToken(),
+    });
+  }
+  const { password } = req.body;
+  const hashPassword = exiteuse.password;
+
+  const match = await bcrypt.compare(password, hashPassword);
+  if (!match) {
+    return res.render("auth/login", {
+      pagina: "Login",
+      errors: [{ msg: "Email o password son incorrecto" }],
+      user: req.body,
+      csrfToken: req.csrfToken(),
+    });
+  }
+  const token = genJwt(exiteuse);
+  return res
+    .cookie("_token", token, {
+      httpOnly: true,
+    })
+    .redirect("/dashboard");
 };
 
 const formRegister = (req, res) => {
@@ -179,6 +234,7 @@ const newPassword = async (req, res) => {
 };
 
 export {
+  login,
   formLogin,
   formRegister,
   formForget,
