@@ -4,7 +4,7 @@ import db from "../config/db.js";
 const Propiedad = db.define("propiedades", {
   id: {
     type: DataTypes.UUID,
-    dafaultValue: DataTypes.UUIDV4,
+    defaultValue: DataTypes.UUIDV4,
     allowNull: false,
     primaryKey: true,
   },
@@ -43,7 +43,15 @@ const Propiedad = db.define("propiedades", {
   publicado: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    dafaultValue: false,
+    defaultValue: false,
+  },
+  precioId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  categoriaId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
   },
 });
 export default Propiedad;

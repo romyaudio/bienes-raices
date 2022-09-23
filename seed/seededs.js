@@ -1,8 +1,9 @@
 import Categorias from "./categorias.js";
-
+import Users from "./user.js";
 import Precios from "./precios.js";
+import Usermatas from "./usermata.js";
 
-import { Categoria, Precio } from "../models/index.js";
+import { Categoria, Precio, Usermata, User } from "../models/index.js";
 import db from "../config/db.js";
 
 const importarDatos = async () => {
@@ -12,6 +13,8 @@ const importarDatos = async () => {
     await Promise.all([
       Categoria.bulkCreate(Categorias),
       Precio.bulkCreate(Precios),
+      User.bulkCreate(Users),
+      Usermata.bulkCreate(Usermatas),
     ]);
 
     console.log("Datos insectado corectamente");
