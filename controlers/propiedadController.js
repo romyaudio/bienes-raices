@@ -3,19 +3,44 @@ import { unlink } from "node:fs/promises";
 import { validationResult } from "express-validator";
 
 const admin = async (req, res) => {
-  const { id } = req.user;
-  const propiedades = await Propiedad.findAll({
-    where: { userId: id },
-    include: [
-      { model: Categoria, as: "categoria" },
-      { model: Precio, as: "precio" },
-    ],
-  });
-  res.render("propiedades/dashboard", {
-    pagina: "Dashboard",
-    propiedades,
-    csrfToken: req.csrfToken(),
-  });
+  const { page } = req.query;
+  const exprecion = /^[1-9]$/;
+  if (!exprecion.test(page)) {
+    return res.redirect("/dashboard?page=1");
+  }
+  try {
+    const { id } = req.user;
+
+    const limit = 10;
+    const offset = page * limit - limit;
+    const [propiedades, total] = await Promise.all([
+      Propiedad.findAll({
+        limit,
+        offset,
+        where: { userId: id },
+        include: [
+          { model: Categoria, as: "categoria" },
+          { model: Precio, as: "precio" },
+        ],
+      }),
+      Propiedad.count({
+        where: { userId: id },
+      }),
+    ]);
+
+    res.render("propiedades/dashboard", {
+      pagina: "Dashboard",
+      propiedades,
+      csrfToken: req.csrfToken(),
+      paginas: Math.ceil(total / limit),
+      page: Number(page),
+      offset,
+      limit,
+      total,
+    });
+  } catch (error) {
+    console, log(error);
+  }
 };
 
 const crear = async (req, res) => {
@@ -217,7 +242,20 @@ const eliminar = async (req, res) => {
 };
 
 const mostrarPropiedad = async (req, res) => {
-  res.send("mostrando...");
+  const { id } = req.params;
+  const propiedad = await Propiedad.findByPk(id, {
+    include: [
+      { model: Categoria, as: "categoria" },
+      { model: Precio, as: "precio" },
+    ],
+  });
+  if (!propiedad) {
+    res.redirect("/404");
+  }
+  res.render("propiedades/mostrar", {
+    propiedad,
+    pagina: propiedad.titulo,
+  });
 };
 
 export {

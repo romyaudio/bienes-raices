@@ -1,6 +1,8 @@
 import express from "express";
 import usersRouter from "./routers/usersRouter.js";
 import propiedadRouter from "./routers/propiedadRouter.js";
+import appRouter from "./routers/appRouter.js";
+import apiRouter from "./routers/apiRouter.js";
 import db from "./config/db.js";
 import csrf from "csurf";
 import cookieParser from "cookie-parser";
@@ -32,8 +34,10 @@ app.set("views", "./views");
 app.use(express.static("public"));
 
 //router
+app.use("/", appRouter);
 app.use("/auth", usersRouter);
 app.use("/", propiedadRouter);
+app.use("/api", apiRouter);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
