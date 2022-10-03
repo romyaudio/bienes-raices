@@ -1,6 +1,13 @@
-import { Categoria, Precio, Propiedad } from "../models/index.js";
+import {
+  Categoria,
+  Precio,
+  Propiedad,
+  Mensage,
+  User,
+} from "../models/index.js";
 import { unlink } from "node:fs/promises";
 import { validationResult } from "express-validator";
+import { esVendedor, formatiarFecha } from "../helpers/index.js";
 
 const admin = async (req, res) => {
   const { page } = req.query;
@@ -21,6 +28,7 @@ const admin = async (req, res) => {
         include: [
           { model: Categoria, as: "categoria" },
           { model: Precio, as: "precio" },
+          { model: Mensage },
         ],
       }),
       Propiedad.count({
@@ -39,7 +47,7 @@ const admin = async (req, res) => {
       total,
     });
   } catch (error) {
-    console, log(error);
+    console.log(error);
   }
 };
 
@@ -250,11 +258,74 @@ const mostrarPropiedad = async (req, res) => {
     ],
   });
   if (!propiedad) {
-    res.redirect("/404");
+    return res.redirect("/404");
   }
+
   res.render("propiedades/mostrar", {
     propiedad,
     pagina: propiedad.titulo,
+    csrfToken: req.csrfToken(),
+    user: req.user,
+    esVendedor: esVendedor(req.user?.id, propiedad.userId),
+  });
+};
+
+const enviarMensage = async (req, res) => {
+  const { id } = req.params;
+
+  const propiedad = await Propiedad.findByPk(id, {
+    include: [
+      { model: Categoria, as: "categoria" },
+      { model: Precio, as: "precio" },
+    ],
+  });
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    return res.render("propiedades/mostrar", {
+      propiedad,
+      pagina: propiedad.titulo,
+      csrfToken: req.csrfToken(),
+      user: req.user,
+      esVendedor: esVendedor(req.user?.id, propiedad.userId),
+      errors: result.array(),
+    });
+  }
+  const { mensage } = req.body;
+  const { id: propiedadId } = req.params;
+  const { id: userId } = req.user;
+
+  await Mensage.create({
+    mensage,
+    propiedadId,
+    userId,
+  });
+
+  return res.redirect("/");
+};
+
+const verMensage = async (req, res) => {
+  const { id } = req.params;
+  const propiedad = await Propiedad.findByPk(id, {
+    include: [
+      {
+        model: Mensage,
+        include: [
+          {
+            model: User,
+            as: "user",
+          },
+        ],
+      },
+    ],
+  });
+  const user = req.user.id.toString();
+  if (propiedad.userId.toString() !== user) {
+    return res.redirect("/dashboard");
+  }
+  res.render("propiedades/mensages", {
+    pagina: "Mensages",
+    mensage: propiedad.mensages,
+    formatiarFecha,
   });
 };
 
@@ -268,4 +339,6 @@ export {
   guardarCambios,
   eliminar,
   mostrarPropiedad,
+  enviarMensage,
+  verMensage,
 };

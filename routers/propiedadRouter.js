@@ -10,9 +10,12 @@ import {
   guardarCambios,
   eliminar,
   mostrarPropiedad,
+  enviarMensage,
+  verMensage,
 } from "../controlers/propiedadController.js";
 import ProtegerRuta from "../middleware/protegerRuta.js";
 import upload from "../middleware/SubirImagen.js";
+import inditificarUsuario from "../middleware/indetificarUsuario.js";
 const router = express.Router();
 router.get("/dashboard", ProtegerRuta, admin);
 router.get("/propiedades/crear", ProtegerRuta, crear);
@@ -53,6 +56,16 @@ router.post(
 
 router.post("/propiedades/eliminar/:id", ProtegerRuta, eliminar);
 
-router.get("/propiedad/:id", mostrarPropiedad);
+router.get("/propiedad/:id", inditificarUsuario, mostrarPropiedad);
+router.post(
+  "/propiedad/:id",
+  inditificarUsuario,
+  body("mensage", "El mensage no puede estar vacio o es muy corto").isLength(
+    10
+  ),
+  enviarMensage
+);
+
+router.get("/mensage/:id", ProtegerRuta, verMensage);
 
 export default router;

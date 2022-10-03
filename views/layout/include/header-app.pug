@@ -1,6 +1,7 @@
 header.bg-indigo-600.p-4 
    .container.mx-auto.flex.justify-between.items-center
-        h1.text-2xl.text-white.font-extrabold.text-center Bienes 
+        a(href="/")
+         h1.text-2xl.text-white.font-extrabold.text-center Bienes 
           span.font-normal Raices
 
         nav(class="my-5 text-sm md:flex md:items-center font-semibold text-white md: gap-3") 
@@ -9,9 +10,15 @@ header.bg-indigo-600.p-4
 
 div(class="bg-indigo-700 py-5 hidden lg:block")
     div(class="container mx-auto flex justify-between")
+     nav(class="flex gap-4 items-center")
        a(href="/categorias/1" class="text-sm font-bold uppercase text-white") Casas         
        a(href="/categorias/2" class="text-sm font-bold uppercase text-white") Apartamentos         
        a(href="/categorias/3" class="text-sm font-bold uppercase text-white") Bodegas         
        a(href="/categorias/4" class="text-sm font-bold uppercase text-white") Cabanas        
-       a(href="/categorias/5" class="text-sm font-bold uppercase text-white") Terrenos         
+       a(href="/categorias/5" class="text-sm font-bold uppercase text-white") Terrenos
+     form(action="/buscador" method="POST" class="flex gap-3 items-center")
+      input(type="hidden" name="_csrf" value= csrfToken) 
+      label(for="termino" class="text-sm uppercase font-bold text-white") Buscador
+      input(type="text" id="termino" name="termino" placeholder ="Buscar Propiedades" class="p-2 rounded shadow text-sm") 
+      input(type="submit" class="p-2 bg-indigo-800 hover:bg-indigo-300 rounded text-sm text-white cursor-pointer font-bold uppercase" value="Buscar")         
           
