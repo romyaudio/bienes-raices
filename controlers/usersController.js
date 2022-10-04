@@ -65,7 +65,9 @@ const login = async (req, res) => {
     })
     .redirect("/dashboard");
 };
-
+const cerrarSesion = async (req, res) => {
+  return res.clearCookie("_token").redirect("/auth/login");
+};
 const formRegister = (req, res) => {
   res.render("auth/register", {
     pagina: "Crear Cuanta",
@@ -235,6 +237,7 @@ const newPassword = async (req, res) => {
 
 export {
   login,
+  cerrarSesion,
   formLogin,
   formRegister,
   formForget,

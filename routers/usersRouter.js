@@ -4,6 +4,7 @@ const router = express.Router();
 //router
 import {
   login,
+  cerrarSesion,
   formForget,
   formLogin,
   formRegister,
@@ -16,6 +17,7 @@ import {
 
 router.get("/login", formLogin);
 router.post("/login", login);
+router.post("/cerrar-sesion", cerrarSesion);
 router.get("/register", formRegister);
 router.post("/register", Register);
 router.get("/verify/:token", formVerify);
